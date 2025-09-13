@@ -48,17 +48,7 @@ habit-tracker-pro/
 - **SQLite**: Development database
 - **PostgreSQL**: Production database (configurable)
 
-## 🔧 Configuration
 
-### Environment Variables
-Create a `.env` file in the root directory:
-
-```env
-SECRET_KEY=your-secret-key-here
-DATABASE_URL=sqlite:///habits.db
-DEBUG=True
-HOST=127.0.0.1
-PORT=5000
 ```
 
 ### Database Configuration
@@ -90,24 +80,5 @@ The application uses SQLite by default. For production, update the `DATABASE_URL
 - Generated recommendations and tips
 - Confidence scores and categorization
 
-## 🎨 Customization
-
-### Themes
-The application supports light and dark themes. Themes are defined using CSS variables in `static/css/style.css`.
-
-### Colors
-Customize the color scheme by modifying the CSS variables:
-```css
-:root {
-    --primary: #6366f1;
-    --secondary: #10b981;
-    --accent: #f59e0b;
-    --motivation: #ec4899;
-}
-```
-
-### Icons
-Habits support Font Awesome icons. Choose from thousands of available icons.
-
-## 🚀 Deployment
+website  = https://habittrackerbygiteshwadhai.streamlit.app/
 
