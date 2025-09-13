@@ -1,0 +1,582 @@
+{% extends "base.html" %}
+
+{% block title %}Add New Habit - HabitTracker Pro{% endblock %}
+
+{% block body_class %}bg-light{% endblock %}
+
+{% block extra_css %}
+<style>
+    .form-container {
+        max-width: 600px;
+        margin: 0 auto;
+        background: var(--card);
+        border-radius: 20px;
+        padding: 2rem;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        border: 1px solid var(--border);
+    }
+    
+    .form-header {
+        text-align: center;
+        margin-bottom: 2rem;
+    }
+    
+    .form-header h1 {
+        background: linear-gradient(135deg, var(--primary), var(--secondary));
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        margin-bottom: 0.5rem;
+    }
+    
+    .form-group {
+        margin-bottom: 1.5rem;
+    }
+    
+    .form-label {
+        font-weight: 600;
+        color: var(--foreground);
+        margin-bottom: 0.5rem;
+        display: block;
+    }
+    
+    .form-control {
+        border: 2px solid var(--border);
+        border-radius: 12px;
+        padding: 0.75rem 1rem;
+        font-size: 1rem;
+        transition: all 0.3s ease;
+        background: var(--card);
+        color: var(--foreground);
+    }
+    
+    .form-control:focus {
+        border-color: var(--primary);
+        box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+        outline: none;
+    }
+    
+    .form-control::placeholder {
+        color: var(--muted-foreground);
+    }
+    
+    .category-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+        gap: 1rem;
+        margin-top: 0.5rem;
+    }
+    
+    .category-option {
+        padding: 1rem;
+        border: 2px solid var(--border);
+        border-radius: 12px;
+        text-align: center;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        background: var(--card);
+    }
+    
+    .category-option:hover {
+        border-color: var(--primary);
+        transform: translateY(-2px);
+        box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+    }
+    
+    .category-option.selected {
+        border-color: var(--primary);
+        background: linear-gradient(135deg, rgba(99, 102, 241, 0.1), rgba(16, 185, 129, 0.1));
+    }
+    
+    .category-option i {
+        font-size: 1.5rem;
+        margin-bottom: 0.5rem;
+        display: block;
+    }
+    
+    .color-picker {
+        display: flex;
+        gap: 0.5rem;
+        flex-wrap: wrap;
+        margin-top: 0.5rem;
+    }
+    
+    .color-option {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        cursor: pointer;
+        border: 3px solid transparent;
+        transition: all 0.3s ease;
+    }
+    
+    .color-option:hover {
+        transform: scale(1.1);
+    }
+    
+    .color-option.selected {
+        border-color: var(--foreground);
+        box-shadow: 0 0 0 2px var(--primary);
+    }
+    
+    .icon-picker {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(50px, 1fr));
+        gap: 0.5rem;
+        margin-top: 0.5rem;
+        max-height: 200px;
+        overflow-y: auto;
+        padding: 1rem;
+        border: 2px solid var(--border);
+        border-radius: 12px;
+        background: var(--background);
+    }
+    
+    .icon-option {
+        width: 50px;
+        height: 50px;
+        border: 2px solid var(--border);
+        border-radius: 8px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        background: var(--card);
+    }
+    
+    .icon-option:hover {
+        border-color: var(--primary);
+        transform: scale(1.1);
+    }
+    
+    .icon-option.selected {
+        border-color: var(--primary);
+        background: linear-gradient(135deg, rgba(99, 102, 241, 0.1), rgba(16, 185, 129, 0.1));
+    }
+    
+    .frequency-options {
+        display: flex;
+        gap: 1rem;
+        margin-top: 0.5rem;
+    }
+    
+    .frequency-option {
+        flex: 1;
+        padding: 1rem;
+        border: 2px solid var(--border);
+        border-radius: 12px;
+        text-align: center;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        background: var(--card);
+    }
+    
+    .frequency-option:hover {
+        border-color: var(--primary);
+        transform: translateY(-2px);
+    }
+    
+    .frequency-option.selected {
+        border-color: var(--primary);
+        background: linear-gradient(135deg, rgba(99, 102, 241, 0.1), rgba(16, 185, 129, 0.1));
+    }
+    
+    .btn-submit {
+        width: 100%;
+        padding: 1rem;
+        font-size: 1.1rem;
+        font-weight: 600;
+        border-radius: 12px;
+        background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+        border: none;
+        color: white;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .btn-submit:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px rgba(99, 102, 241, 0.3);
+    }
+    
+    .btn-submit:active {
+        transform: translateY(0);
+    }
+    
+    .btn-submit::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+        transition: left 0.5s;
+    }
+    
+    .btn-submit:hover::before {
+        left: 100%;
+    }
+    
+    .preview-card {
+        background: var(--card);
+        border: 2px solid var(--border);
+        border-radius: 16px;
+        padding: 1.5rem;
+        margin-top: 1rem;
+        transition: all 0.3s ease;
+    }
+    
+    .preview-habit {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+    }
+    
+    .preview-icon {
+        width: 48px;
+        height: 48px;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.5rem;
+        color: white;
+    }
+    
+    .preview-info h4 {
+        margin: 0;
+        color: var(--foreground);
+    }
+    
+    .preview-info p {
+        margin: 0.25rem 0 0 0;
+        color: var(--muted-foreground);
+        font-size: 0.9rem;
+    }
+    
+    .preview-badges {
+        display: flex;
+        gap: 0.5rem;
+        margin-top: 0.5rem;
+    }
+    
+    .preview-badge {
+        padding: 0.25rem 0.75rem;
+        border-radius: 20px;
+        font-size: 0.8rem;
+        font-weight: 500;
+        color: white;
+    }
+    
+    .back-btn {
+        position: absolute;
+        top: 2rem;
+        left: 2rem;
+        width: 50px;
+        height: 50px;
+        border-radius: 50%;
+        background: var(--card);
+        border: 2px solid var(--border);
+        color: var(--foreground);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        text-decoration: none;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+    }
+    
+    .back-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(0,0,0,0.15);
+        color: var(--primary);
+        border-color: var(--primary);
+    }
+    
+    @media (max-width: 768px) {
+        .form-container {
+            margin: 1rem;
+            padding: 1.5rem;
+        }
+        
+        .back-btn {
+            top: 1rem;
+            left: 1rem;
+            width: 40px;
+            height: 40px;
+        }
+        
+        .category-grid {
+            grid-template-columns: repeat(2, 1fr);
+        }
+        
+        .frequency-options {
+            flex-direction: column;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <a href="{{ url_for('dashboard') }}" class="back-btn" title="Back to Dashboard">
+        <i class="fas fa-arrow-left"></i>
+    </a>
+    
+    <div class="form-container">
+        <div class="form-header">
+            <h1>Create New Habit</h1>
+            <p class="text-muted">Build a habit that sticks with smart tracking and insights</p>
+        </div>
+
+        <form method="POST" id="habit-form">
+            <div class="form-group">
+                <label for="name" class="form-label">
+                    <i class="fas fa-tag me-2"></i>Habit Name
+                </label>
+                <input type="text" class="form-control" id="name" name="name" 
+                       placeholder="e.g., Drink 8 glasses of water" required>
+            </div>
+
+            <div class="form-group">
+                <label for="description" class="form-label">
+                    <i class="fas fa-align-left me-2"></i>Description (Optional)
+                </label>
+                <textarea class="form-control" id="description" name="description" rows="3"
+                          placeholder="Add a description to help you remember why this habit matters..."></textarea>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">
+                    <i class="fas fa-layer-group me-2"></i>Category
+                </label>
+                <div class="category-grid">
+                    <div class="category-option" data-category="health">
+                        <i class="fas fa-heart text-danger"></i>
+                        <div>Health</div>
+                    </div>
+                    <div class="category-option" data-category="productivity">
+                        <i class="fas fa-briefcase text-primary"></i>
+                        <div>Productivity</div>
+                    </div>
+                    <div class="category-option" data-category="wellness">
+                        <i class="fas fa-spa text-success"></i>
+                        <div>Wellness</div>
+                    </div>
+                    <div class="category-option" data-category="learning">
+                        <i class="fas fa-book text-info"></i>
+                        <div>Learning</div>
+                    </div>
+                    <div class="category-option" data-category="fitness">
+                        <i class="fas fa-dumbbell text-warning"></i>
+                        <div>Fitness</div>
+                    </div>
+                    <div class="category-option" data-category="mindfulness">
+                        <i class="fas fa-leaf text-success"></i>
+                        <div>Mindfulness</div>
+                    </div>
+                </div>
+                <input type="hidden" id="category" name="category" required>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">
+                    <i class="fas fa-palette me-2"></i>Color Theme
+                </label>
+                <div class="color-picker">
+                    <div class="color-option selected" data-color="#6366f1" style="background: #6366f1;"></div>
+                    <div class="color-option" data-color="#10b981" style="background: #10b981;"></div>
+                    <div class="color-option" data-color="#f59e0b" style="background: #f59e0b;"></div>
+                    <div class="color-option" data-color="#ec4899" style="background: #ec4899;"></div>
+                    <div class="color-option" data-color="#8b5cf6" style="background: #8b5cf6;"></div>
+                    <div class="color-option" data-color="#06b6d4" style="background: #06b6d4;"></div>
+                    <div class="color-option" data-color="#ef4444" style="background: #ef4444;"></div>
+                    <div class="color-option" data-color="#84cc16" style="background: #84cc16;"></div>
+                </div>
+                <input type="hidden" id="color" name="color" value="#6366f1">
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">
+                    <i class="fas fa-icons me-2"></i>Icon
+                </label>
+                <div class="icon-picker">
+                    <div class="icon-option selected" data-icon="fas fa-check-circle">
+                        <i class="fas fa-check-circle"></i>
+                    </div>
+                    <div class="icon-option" data-icon="fas fa-heart">
+                        <i class="fas fa-heart"></i>
+                    </div>
+                    <div class="icon-option" data-icon="fas fa-dumbbell">
+                        <i class="fas fa-dumbbell"></i>
+                    </div>
+                    <div class="icon-option" data-icon="fas fa-book">
+                        <i class="fas fa-book"></i>
+                    </div>
+                    <div class="icon-option" data-icon="fas fa-water">
+                        <i class="fas fa-water"></i>
+                    </div>
+                    <div class="icon-option" data-icon="fas fa-moon">
+                        <i class="fas fa-moon"></i>
+                    </div>
+                    <div class="icon-option" data-icon="fas fa-sun">
+                        <i class="fas fa-sun"></i>
+                    </div>
+                    <div class="icon-option" data-icon="fas fa-leaf">
+                        <i class="fas fa-leaf"></i>
+                    </div>
+                    <div class="icon-option" data-icon="fas fa-running">
+                        <i class="fas fa-running"></i>
+                    </div>
+                    <div class="icon-option" data-icon="fas fa-apple-alt">
+                        <i class="fas fa-apple-alt"></i>
+                    </div>
+                    <div class="icon-option" data-icon="fas fa-coffee">
+                        <i class="fas fa-coffee"></i>
+                    </div>
+                    <div class="icon-option" data-icon="fas fa-meditation">
+                        <i class="fas fa-meditation"></i>
+                    </div>
+                </div>
+                <input type="hidden" id="icon" name="icon" value="fas fa-check-circle">
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">
+                    <i class="fas fa-clock me-2"></i>Frequency
+                </label>
+                <div class="frequency-options">
+                    <div class="frequency-option selected" data-frequency="daily">
+                        <i class="fas fa-calendar-day d-block mb-2"></i>
+                        <div>Daily</div>
+                    </div>
+                    <div class="frequency-option" data-frequency="weekly">
+                        <i class="fas fa-calendar-week d-block mb-2"></i>
+                        <div>Weekly</div>
+                    </div>
+                    <div class="frequency-option" data-frequency="custom">
+                        <i class="fas fa-cog d-block mb-2"></i>
+                        <div>Custom</div>
+                    </div>
+                </div>
+                <input type="hidden" id="frequency" name="frequency" value="daily">
+            </div>
+
+            <!-- Preview Card -->
+            <div class="preview-card" id="preview-card">
+                <h5 class="mb-3">
+                    <i class="fas fa-eye me-2"></i>Preview
+                </h5>
+                <div class="preview-habit">
+                    <div class="preview-icon" id="preview-icon" style="background: #6366f1;">
+                        <i class="fas fa-check-circle"></i>
+                    </div>
+                    <div class="preview-info">
+                        <h4 id="preview-name">Your Habit Name</h4>
+                        <p id="preview-description">Your habit description will appear here</p>
+                        <div class="preview-badges">
+                            <span class="preview-badge" id="preview-category" style="background: #6366f1;">Health</span>
+                            <span class="preview-badge" id="preview-frequency" style="background: #10b981;">Daily</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <button type="submit" class="btn-submit">
+                <i class="fas fa-plus me-2"></i>Create Habit
+            </button>
+        </form>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Category selection
+    document.querySelectorAll('.category-option').forEach(option => {
+        option.addEventListener('click', function() {
+            document.querySelectorAll('.category-option').forEach(opt => opt.classList.remove('selected'));
+            this.classList.add('selected');
+            document.getElementById('category').value = this.dataset.category;
+            updatePreview();
+        });
+    });
+
+    // Color selection
+    document.querySelectorAll('.color-option').forEach(option => {
+        option.addEventListener('click', function() {
+            document.querySelectorAll('.color-option').forEach(opt => opt.classList.remove('selected'));
+            this.classList.add('selected');
+            document.getElementById('color').value = this.dataset.color;
+            updatePreview();
+        });
+    });
+
+    // Icon selection
+    document.querySelectorAll('.icon-option').forEach(option => {
+        option.addEventListener('click', function() {
+            document.querySelectorAll('.icon-option').forEach(opt => opt.classList.remove('selected'));
+            this.classList.add('selected');
+            document.getElementById('icon').value = this.dataset.icon;
+            updatePreview();
+        });
+    });
+
+    // Frequency selection
+    document.querySelectorAll('.frequency-option').forEach(option => {
+        option.addEventListener('click', function() {
+            document.querySelectorAll('.frequency-option').forEach(opt => opt.classList.remove('selected'));
+            this.classList.add('selected');
+            document.getElementById('frequency').value = this.dataset.frequency;
+            updatePreview();
+        });
+    });
+
+    // Update preview
+    function updatePreview() {
+        const name = document.getElementById('name').value || 'Your Habit Name';
+        const description = document.getElementById('description').value || 'Your habit description will appear here';
+        const category = document.getElementById('category').value || 'health';
+        const color = document.getElementById('color').value || '#6366f1';
+        const icon = document.getElementById('icon').value || 'fas fa-check-circle';
+        const frequency = document.getElementById('frequency').value || 'daily';
+
+        document.getElementById('preview-name').textContent = name;
+        document.getElementById('preview-description').textContent = description;
+        document.getElementById('preview-category').textContent = category.charAt(0).toUpperCase() + category.slice(1);
+        document.getElementById('preview-frequency').textContent = frequency.charAt(0).toUpperCase() + frequency.slice(1);
+        
+        const previewIcon = document.getElementById('preview-icon');
+        previewIcon.style.background = color;
+        previewIcon.innerHTML = `<i class="${icon}"></i>`;
+        
+        document.getElementById('preview-category').style.background = color;
+    }
+
+    // Real-time preview updates
+    document.getElementById('name').addEventListener('input', updatePreview);
+    document.getElementById('description').addEventListener('input', updatePreview);
+
+    // Form submission with loading state
+    document.getElementById('habit-form').addEventListener('submit', function(e) {
+        const submitBtn = this.querySelector('.btn-submit');
+        const originalText = submitBtn.innerHTML;
+        
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Creating...';
+        
+        // Re-enable after 3 seconds if there's an error
+        setTimeout(() => {
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = originalText;
+        }, 3000);
+    });
+
+    // Initialize preview
+    updatePreview();
+</script>
+{% endblock %}

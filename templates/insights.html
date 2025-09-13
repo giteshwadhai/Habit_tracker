@@ -1,0 +1,500 @@
+{% extends "base.html" %}
+
+{% block title %}Insights - HabitTracker Pro{% endblock %}
+
+{% block body_class %}bg-light{% endblock %}
+
+{% block extra_css %}
+<style>
+    .insights-header {
+        background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+        color: white;
+        padding: 3rem 0;
+        margin-bottom: 2rem;
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .insights-header::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        right: -50%;
+        width: 200%;
+        height: 200%;
+        background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+        animation: float 8s ease-in-out infinite;
+    }
+    
+    @keyframes float {
+        0%, 100% { transform: translateY(0px) rotate(0deg); }
+        50% { transform: translateY(-30px) rotate(180deg); }
+    }
+    
+    .chart-container {
+        background: var(--card);
+        border-radius: 16px;
+        padding: 2rem;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+        border: 1px solid var(--border);
+        margin-bottom: 2rem;
+    }
+    
+    .chart-title {
+        font-size: 1.5rem;
+        font-weight: 600;
+        margin-bottom: 1rem;
+        color: var(--foreground);
+    }
+    
+    .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 1.5rem;
+        margin-bottom: 2rem;
+    }
+    
+    .stat-card {
+        background: var(--card);
+        border-radius: 12px;
+        padding: 1.5rem;
+        text-align: center;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+        border: 1px solid var(--border);
+        transition: all 0.3s ease;
+    }
+    
+    .stat-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 8px 25px rgba(0,0,0,0.12);
+    }
+    
+    .stat-icon {
+        width: 50px;
+        height: 50px;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.5rem;
+        color: white;
+        margin: 0 auto 1rem;
+    }
+    
+    .stat-value {
+        font-size: 2rem;
+        font-weight: 700;
+        color: var(--foreground);
+        margin-bottom: 0.5rem;
+    }
+    
+    .stat-label {
+        color: var(--muted-foreground);
+        font-size: 0.9rem;
+    }
+    
+    .habit-progress {
+        background: var(--card);
+        border-radius: 12px;
+        padding: 1.5rem;
+        margin-bottom: 1rem;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+        border: 1px solid var(--border);
+    }
+    
+    .habit-progress-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 1rem;
+    }
+    
+    .habit-name {
+        font-weight: 600;
+        color: var(--foreground);
+    }
+    
+    .completion-rate {
+        font-weight: 600;
+        color: var(--primary);
+    }
+    
+    .progress-bar-container {
+        background: var(--muted);
+        height: 8px;
+        border-radius: 4px;
+        overflow: hidden;
+        margin-bottom: 0.5rem;
+    }
+    
+    .progress-bar-fill {
+        height: 100%;
+        background: linear-gradient(90deg, var(--primary), var(--secondary));
+        transition: width 0.5s ease;
+        border-radius: 4px;
+    }
+    
+    .habit-stats {
+        display: flex;
+        justify-content: space-between;
+        font-size: 0.9rem;
+        color: var(--muted-foreground);
+    }
+    
+    .insights-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 1.5rem;
+        margin-bottom: 2rem;
+    }
+    
+    .insight-card {
+        background: var(--card);
+        border-radius: 12px;
+        padding: 1.5rem;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+        border: 1px solid var(--border);
+        transition: all 0.3s ease;
+    }
+    
+    .insight-card:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 8px 25px rgba(0,0,0,0.12);
+    }
+    
+    .insight-header {
+        display: flex;
+        align-items: center;
+        margin-bottom: 1rem;
+    }
+    
+    .insight-icon {
+        width: 40px;
+        height: 40px;
+        border-radius: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.2rem;
+        color: white;
+        margin-right: 1rem;
+    }
+    
+    .insight-title {
+        font-weight: 600;
+        color: var(--foreground);
+        margin: 0;
+    }
+    
+    .insight-message {
+        color: var(--muted-foreground);
+        line-height: 1.5;
+        margin-bottom: 1rem;
+    }
+    
+    .insight-confidence {
+        font-size: 0.8rem;
+        color: var(--muted-foreground);
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+    
+    .confidence-bar {
+        width: 60px;
+        height: 4px;
+        background: var(--muted);
+        border-radius: 2px;
+        overflow: hidden;
+    }
+    
+    .confidence-fill {
+        height: 100%;
+        background: linear-gradient(90deg, var(--primary), var(--secondary));
+        border-radius: 2px;
+    }
+    
+    .empty-state {
+        text-align: center;
+        padding: 3rem 2rem;
+        color: var(--muted-foreground);
+    }
+    
+    .empty-state i {
+        font-size: 4rem;
+        margin-bottom: 1rem;
+        opacity: 0.5;
+    }
+    
+    .chart-placeholder {
+        height: 300px;
+        background: linear-gradient(135deg, rgba(99, 102, 241, 0.1), rgba(16, 185, 129, 0.1));
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: var(--muted-foreground);
+        font-size: 1.1rem;
+    }
+    
+    @media (max-width: 768px) {
+        .insights-header {
+            padding: 2rem 0;
+        }
+        
+        .stats-grid {
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1rem;
+        }
+        
+        .insights-grid {
+            grid-template-columns: 1fr;
+        }
+        
+        .habit-progress-header {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 0.5rem;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <!-- Header Section -->
+    <div class="insights-header">
+        <div class="container">
+            <div class="row align-items-center">
+                <div class="col-md-8">
+                    <h1 class="mb-2">Your Habit Insights</h1>
+                    <p class="mb-0 opacity-75">Discover patterns and optimize your habit-building journey</p>
+                </div>
+                <div class="col-md-4 text-md-end">
+                    <div class="d-flex align-items-center justify-content-md-end gap-3">
+                        <div class="text-center">
+                            <div class="h4 mb-0">{{ user_stats.level if user_stats else 1 }}</div>
+                            <small class="opacity-75">Level</small>
+                        </div>
+                        <div class="text-center">
+                            <div class="h4 mb-0">{{ user_stats.total_points if user_stats else 0 }}</div>
+                            <small class="opacity-75">Points</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="container">
+        <!-- Stats Overview -->
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-icon" style="background: linear-gradient(135deg, var(--primary), var(--primary-dark));">
+                    <i class="fas fa-calendar-check"></i>
+                </div>
+                <div class="stat-value">{{ total_habits }}</div>
+                <div class="stat-label">Total Habits</div>
+            </div>
+            
+            <div class="stat-card">
+                <div class="stat-icon" style="background: linear-gradient(135deg, var(--secondary), var(--secondary-light));">
+                    <i class="fas fa-fire"></i>
+                </div>
+                <div class="stat-value">{{ longest_streak }}</div>
+                <div class="stat-label">Best Streak</div>
+            </div>
+            
+            <div class="stat-card">
+                <div class="stat-icon" style="background: linear-gradient(135deg, var(--accent), var(--warning));">
+                    <i class="fas fa-chart-line"></i>
+                </div>
+                <div class="stat-value">{{ weekly_completion }}%</div>
+                <div class="stat-label">Weekly Completion</div>
+            </div>
+            
+            <div class="stat-card">
+                <div class="stat-icon" style="background: linear-gradient(135deg, var(--motivation), var(--warning));">
+                    <i class="fas fa-trophy"></i>
+                </div>
+                <div class="stat-value">{{ achievements|length }}</div>
+                <div class="stat-label">Achievements</div>
+            </div>
+        </div>
+
+        <!-- Habit Progress Charts -->
+        <div class="chart-container">
+            <h3 class="chart-title">
+                <i class="fas fa-chart-bar me-2"></i>Habit Progress Overview
+            </h3>
+            
+            {% if habits %}
+                {% for habit in habits %}
+                <div class="habit-progress">
+                    <div class="habit-progress-header">
+                        <div class="d-flex align-items-center">
+                            <div class="habit-icon me-3" style="background: {{ habit.color }};">
+                                <i class="{{ habit.icon }}"></i>
+                            </div>
+                            <div>
+                                <div class="habit-name">{{ habit.name }}</div>
+                                <small class="text-muted">{{ habit.category }}</small>
+                            </div>
+                        </div>
+                        <div class="completion-rate">{{ habit.completion_rate }}%</div>
+                    </div>
+                    
+                    <div class="progress-bar-container">
+                        <div class="progress-bar-fill" style="width: {{ habit.completion_rate }}%"></div>
+                    </div>
+                    
+                    <div class="habit-stats">
+                        <div>
+                            <i class="fas fa-fire me-1"></i>
+                            {{ habit.streak }} day streak
+                        </div>
+                        <div>
+                            <i class="fas fa-calendar me-1"></i>
+                            {{ habit.logs|length }} total days
+                        </div>
+                        <div>
+                            <i class="fas fa-check-circle me-1"></i>
+                            {{ habit.logs|selectattr('completed')|list|length }} completed
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            {% else %}
+                <div class="empty-state">
+                    <i class="fas fa-chart-line"></i>
+                    <h3>No Data Yet</h3>
+                    <p>Start tracking habits to see your progress here.</p>
+                    <a href="{{ url_for('new_habit') }}" class="btn btn-primary">
+                        <i class="fas fa-plus me-2"></i>Add Your First Habit
+                    </a>
+                </div>
+            {% endif %}
+        </div>
+
+        <!-- Weekly Trend Chart -->
+        <div class="chart-container">
+            <h3 class="chart-title">
+                <i class="fas fa-chart-line me-2"></i>Weekly Trend
+            </h3>
+            <div class="chart-placeholder">
+                <div class="text-center">
+                    <i class="fas fa-chart-line fa-3x mb-3"></i>
+                    <p>Weekly trend visualization coming soon!</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- AI Insights -->
+        <div class="insights-grid">
+            {% for insight in insights %}
+            <div class="insight-card">
+                <div class="insight-header">
+                    <div class="insight-icon 
+                        {% if insight.type == 'motivation' %}bg-motivation
+                        {% elif insight.type == 'improvement' %}bg-primary
+                        {% elif insight.type == 'trend' %}bg-secondary
+                        {% else %}bg-accent{% endif %}">
+                        {% if insight.type == 'motivation' %}
+                            <i class="fas fa-heart"></i>
+                        {% elif insight.type == 'improvement' %}
+                            <i class="fas fa-lightbulb"></i>
+                        {% elif insight.type == 'trend' %}
+                            <i class="fas fa-chart-line"></i>
+                        {% else %}
+                            <i class="fas fa-brain"></i>
+                        {% endif %}
+                    </div>
+                    <h5 class="insight-title">{{ insight.title }}</h5>
+                </div>
+                
+                <p class="insight-message">{{ insight.message }}</p>
+                
+                <div class="insight-confidence">
+                    <span>Confidence:</span>
+                    <div class="confidence-bar">
+                        <div class="confidence-fill" style="width: {{ insight.confidence }}%"></div>
+                    </div>
+                    <span>{{ insight.confidence }}%</span>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+
+        <!-- Generate New Insight -->
+        <div class="text-center">
+            <form action="{{ url_for('api_generate_insight') }}" method="post" id="generate-insight-form">
+                <button type="submit" class="btn btn-primary btn-lg">
+                    <i class="fas fa-brain me-2"></i>Generate New Insight
+                </button>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Animate progress bars on page load
+    document.addEventListener('DOMContentLoaded', function() {
+        const progressBars = document.querySelectorAll('.progress-bar-fill');
+        
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    const bar = entry.target;
+                    const width = bar.style.width;
+                    bar.style.width = '0%';
+                    
+                    setTimeout(() => {
+                        bar.style.width = width;
+                    }, 200);
+                }
+            });
+        });
+
+        progressBars.forEach(bar => observer.observe(bar));
+    });
+
+    // Handle insight generation
+    document.getElementById('generate-insight-form').addEventListener('submit', function(e) {
+        e.preventDefault();
+        const button = this.querySelector('button');
+        const originalText = button.innerHTML;
+        
+        button.disabled = true;
+        button.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Generating...';
+
+        fetch(this.action, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+        })
+        .then(response => response.json())
+        .then(data => {
+            location.reload();
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            button.disabled = false;
+            button.innerHTML = originalText;
+        });
+    });
+
+    // Add hover effects to cards
+    document.querySelectorAll('.stat-card, .habit-progress, .insight-card').forEach(card => {
+        card.addEventListener('mouseenter', function() {
+            this.style.transform = 'translateY(-5px)';
+        });
+        
+        card.addEventListener('mouseleave', function() {
+            this.style.transform = 'translateY(0)';
+        });
+    });
+</script>
+{% endblock %}
